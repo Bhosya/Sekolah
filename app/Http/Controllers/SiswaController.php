@@ -2,86 +2,76 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Kelas;
-use App\Models\Siswa;
 use Illuminate\Http\Request;
+use App\Models\Siswa;
+use App\Models\Kelas;
 
 class SiswaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $data['siswa'] = Siswa::all();
-        $data['kelas'] = Kelas::all();
+        $kelas = Kelas::all();
+        $siswa = Siswa::orderBy('Kelas')->get();
 
-        return view("siswa.index", $data);
-    }
-
-    public function show(Request $request)
-    {
-        $kelas = $request->get('kelas');
-
-        if ($kelas) {
-            $siswa = Siswa::where('Kelas', $kelas)->get();
-        } else {
-            $siswa = Siswa::all();
+        if ($request->ajax()) {
+            $siswa = Siswa::where('Kelas', $request->kelas)->get();
+            return view('partials.siswa', compact('siswa'))->render();
         }
 
-        $kelas = Siswa::select('Kelas')->distinct()->get();
-
-        return view('siswa.index', compact('siswa', 'kelas'));
+        return view('siswa.index', compact('siswa', 'kelas'))->with('entityType', 'siswa');
     }
 
     public function create()
     {
-        $data["kelas"] = Kelas::all();
-        return view("siswa.create", $data);
+        $kelas = Kelas::all();
+
+        return view('siswa.create', compact('kelas'));
     }
-    
+
     public function store(Request $request)
     {
         $request->validate([
-            "nama" => "required",
-            "kelas" => "required"
+            'nama' => 'required|string|max:255',
+            'kelas' => 'required|string|max:255',
         ]);
 
-        $siswa = new Siswa();
-        $siswa->Nama = $request->input("nama");
-        $siswa->Kelas = $request->input("kelas");
-        $siswa->save();
+        Siswa::create([
+            'Nama' => $request->nama,
+            'Kelas' => $request->kelas,
+        ]);
 
-        return redirect()->route("siswa.index")->with("success", "siswa berhasil ditambahkan.");
+        return response()->json(['success' => 'Siswa berhasil ditambahkan']);
     }
 
-    public function edit(string $id)
+    public function edit($id)
     {
+        $siswa = Siswa::findOrFail($id);
+        $kelas = Kelas::all();
 
-        $data["siswa"] = Siswa::find($id);
-        $data["kelas"] = Kelas::all();
-
-        return view("siswa.edit", $data);
+        return view('siswa.edit', compact('siswa', 'kelas'));
     }
 
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
         $request->validate([
-            "nama" => "required",
-            "kelas" => "required"
+            'nama' => 'required|string|max:255',
+            'kelas' => 'required|string|max:255',
         ]);
 
-        $siswa = Siswa::find($id);
-        $siswa->Nama = $request->input("nama");
-        $siswa->Kelas = $request->input("kelas");
-        $siswa->save();
+        $siswa = Siswa::findOrFail($id);
+        $siswa->update([
+            'Nama' => $request->nama,
+            'Kelas' => $request->kelas,
+        ]);
 
-        return redirect()->route("siswa.index")->with("success", "siswa berhasil diubah.");
+        return response()->json(['success' => 'Siswa berhasil diperbarui']);
     }
 
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        $siswa = Siswa::find($id);
-
+        $siswa = Siswa::findOrFail($id);
         $siswa->delete();
 
-        return redirect()->route("siswa.index")->with("success", "siswa berhasil dihapus.");
+        return response()->json(['success' => 'Siswa berhasil dihapus']);
     }
 }

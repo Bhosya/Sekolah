@@ -18,7 +18,7 @@ Auth::routes();
 
 Route::middleware(['auth'])->group(function () {
     Route::resource('siswa', SiswaController::class);
-    Route::get('/siswa/filter', [SiswaController::class, 'filter'])->name('siswa.filter');
+    Route::get('siswa/filter', [SiswaController::class, 'filter'])->name('siswa.filter');
 
     Route::resource('guru', GuruController::class);
     Route::get('/guru/filter', [GuruController::class, 'filter'])->name('guru.filter');

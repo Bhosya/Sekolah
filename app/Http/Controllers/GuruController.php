@@ -8,80 +8,70 @@ use Illuminate\Http\Request;
 
 class GuruController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $data['guru'] = Guru::all();
-        $data['kelas'] = Kelas::all();
+        $kelas = Kelas::all();
+        $guru = Guru::orderBy('Kelas')->get();
 
-        return view("guru.index", $data);
-    }
-
-    public function show(Request $request)
-    {
-        $kelas = $request->get('kelas');
-
-        if ($kelas) {
-            $guru = Guru::where('Kelas', $kelas)->get();
-        } else {
-            $guru = Guru::all();
+        if ($request->ajax()) {
+            $guru = Guru::where('Kelas', $request->kelas)->get();
+            return view('partials.guru', compact('guru'))->render();
         }
 
-        $kelas = Guru::select('Kelas')->distinct()->get();
-
-        return view('guru.index', compact('guru', 'kelas'));
+        return view('guru.index', compact('guru', 'kelas'))->with('entityType', 'guru');
     }
 
     public function create()
     {
-        $data["kelas"] = Kelas::all();
-        return view("guru.create", $data);
+        $kelas = Kelas::all();
+
+        return view('guru.create', compact('kelas'));
     }
-    
+
     public function store(Request $request)
     {
         $request->validate([
-            "nama" => "required",
-            "kelas" => "required"
+            'nama' => 'required|string|max:255',
+            'kelas' => 'required|string|max:255',
         ]);
 
-        $guru = new Guru();
-        $guru->Nama = $request->input("nama");
-        $guru->Kelas = $request->input("kelas");
-        $guru->save();
+        Guru::create([
+            'Nama' => $request->nama,
+            'Kelas' => $request->kelas,
+        ]);
 
-        return redirect()->route("guru.index")->with("success", "guru berhasil ditambahkan.");
+        return response()->json(['success' => 'guru berhasil ditambahkan']);
     }
 
-    public function edit(string $id)
+    public function edit($id)
     {
+        $guru = Guru::findOrFail($id);
+        $kelas = Kelas::all();
 
-        $data["guru"] = Guru::find($id);
-        $data["kelas"] = Kelas::all();
-
-        return view("guru.edit", $data);
+        return view('guru.edit', compact('guru', 'kelas'));
     }
 
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
         $request->validate([
-            "nama" => "required",
-            "kelas" => "required"
+            'nama' => 'required|string|max:255',
+            'kelas' => 'required|string|max:255',
         ]);
 
-        $guru = Guru::find($id);
-        $guru->Nama = $request->input("nama");
-        $guru->Kelas = $request->input("kelas");
-        $guru->save();
+        $guru = Guru::findOrFail($id);
+        $guru->update([
+            'Nama' => $request->nama,
+            'Kelas' => $request->kelas,
+        ]);
 
-        return redirect()->route("guru.index")->with("success", "guru berhasil diubah.");
+        return response()->json(['success' => 'guru berhasil diperbarui']);
     }
 
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        $guru = Guru::find($id);
-
+        $guru = Guru::findOrFail($id);
         $guru->delete();
 
-        return redirect()->route("guru.index")->with("success", "guru berhasil dihapus.");
+        return response()->json(['success' => 'guru berhasil dihapus']);
     }
 }

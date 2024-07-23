@@ -9,9 +9,9 @@ class KelasController extends Controller
 {
     public function index()
     {
-        $data['kelas'] = Kelas::all();
+        $kelas = Kelas::orderBy('kelas')->get();
 
-        return view("kelas.index", $data);
+        return view('kelas.index', compact('kelas'))->with('entityType', 'kelas');
     }
 
     public function create()
@@ -22,43 +22,43 @@ class KelasController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            "kelas" => "required"
+            'kelas' => 'required|string|max:255'
         ]);
 
-        $kelas = new Kelas();
-        $kelas->Kelas = $request->input("kelas");
-        $kelas->save();
+        Kelas::create([
+            'Kelas' => $request->kelas
+        ]);
 
-        return redirect()->route("kelas.index")->with("success", "Kelas berhasil ditambahkan.");
+        return response()->json(['success' => 'Kelas berhasil ditambahkan']);
     }
 
     public function edit(string $id)
     {
 
-        $data["kelas"] = Kelas::find($id);
+        $kelas = Kelas::findOrFail($id);
 
-        return view("kelas.edit", $data);
+        return view("kelas.edit", compact('kelas'));
     }
 
     public function update(Request $request, string $id)
     {
         $request->validate([
-            "kelas" => "required"
+            'kelas' => 'required|string|max:255'
         ]);
 
-        $kelas = Kelas::find($id);
-        $kelas->Kelas = $request->input("kelas");
-        $kelas->save();
+        $kelas = Kelas::findOrFail($id);
+        $kelas->update([
+            'Kelas' => $request->kelas
+        ]);
 
-        return redirect()->route("kelas.index")->with("success", "Kelas berhasil diubah.");
+        return response()->json(['success' => 'Kelas berhasil diperbarui']);
     }
 
     public function destroy(string $id)
     {
         $kelas = Kelas::find($id);
-
         $kelas->delete();
 
-        return redirect()->route("kelas.index")->with("success", "Kelas berhasil dihapus.");
+        return response()->json(['success' => 'Siswa berhasil dihapus']);
     }
 }

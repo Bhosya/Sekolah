@@ -9,6 +9,8 @@ class Guru extends Model
 {
     use HasFactory;
 
+    protected $fillable = ['Nama', 'Kelas'];
+
     public function kelas()
     {
         return $this->belongsTo(Kelas::class, 'Kelas', 'Kelas');
