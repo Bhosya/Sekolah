@@ -45,10 +45,13 @@ class SiswaController extends Controller
 
     public function edit($id)
     {
-        $siswa = Siswa::findOrFail($id);
-        $kelas = Kelas::all();
+        $siswa = Siswa::find($id);
 
-        return view('siswa.edit', compact('siswa', 'kelas'));
+        if ($siswa) {
+            return response()->json($siswa);
+        } else {
+            return response()->json(['error' => 'Data tidak ditemukan'], 404);
+        }
     }
 
     public function update(Request $request, $id)

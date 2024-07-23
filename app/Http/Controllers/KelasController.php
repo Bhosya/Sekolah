@@ -34,10 +34,13 @@ class KelasController extends Controller
 
     public function edit(string $id)
     {
+        $kelas = Kelas::find($id);
 
-        $kelas = Kelas::findOrFail($id);
-
-        return view("kelas.edit", compact('kelas'));
+        if ($kelas) {
+            return response()->json($kelas);
+        } else {
+            return response()->json(['error' => 'Data tidak ditemukan'], 404);
+        }
     }
 
     public function update(Request $request, string $id)

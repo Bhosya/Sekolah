@@ -45,10 +45,13 @@ class GuruController extends Controller
 
     public function edit($id)
     {
-        $guru = Guru::findOrFail($id);
-        $kelas = Kelas::all();
+        $guru = Guru::find($id);
 
-        return view('guru.edit', compact('guru', 'kelas'));
+        if ($guru) {
+            return response()->json($guru);
+        } else {
+            return response()->json(['error' => 'Data tidak ditemukan'], 404);
+        }
     }
 
     public function update(Request $request, $id)
@@ -64,7 +67,7 @@ class GuruController extends Controller
             'Kelas' => $request->kelas,
         ]);
 
-        return response()->json(['success' => 'guru berhasil diperbarui']);
+        return response()->json(['success' => 'Guru berhasil diperbarui']);
     }
 
     public function destroy($id)
